@@ -1,31 +1,38 @@
-# This workflow will install Python dependencies, run tests and lint with a single version of Python
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+name: Python application
 
-pipeline {
-    agent any
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
 
-    stages {
+permissions:
+  contents: read
 
-        stage('Install Dependencies') {
-            steps {
-                bat 'pip install -r requirements.txt'
-            }
-        }
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-        stage('Test') {
-            steps {
-                bat 'pytest'
-            }
-        }
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-        stage('Build') {
-            steps {
-                bat 'mkdir build'
-                bat 'copy app.py build\\'
-                bat 'copy requirements.txt build\\'
-            }
-        }
-    }
-}
-      run: |
-        pytest
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Test
+        run: |
+          pytest
+
+      - name: Build
+        run: |
+          mkdir -p build
+          cp app.py build/
+          cp requirements.txt build/
